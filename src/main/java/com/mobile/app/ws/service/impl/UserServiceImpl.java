@@ -20,6 +20,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto user) {
 
+        UserEntity userExists = userRepository.findByEmail(user.getEmail());
+        if (userExists != null) throw new RuntimeException("Record already exists");
+
         UserEntity userToBeSaved = new UserEntity();
         BeanUtils.copyProperties(user , userToBeSaved);
         userToBeSaved.setEncryptedPassword("test");
@@ -47,11 +50,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto findUserByUserId(String userId) {
 
-        UserEntity existingUser = userRepository.findByUserId(userId);
-//        if(existingUser != null)
+        UserEntity userExists = userRepository.findByUserId(userId);
+        if(userExists == null) throw new RuntimeException("Record doesn't exist");
 
         UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(existingUser , returnValue);
+        BeanUtils.copyProperties(userExists , returnValue);
         return returnValue;
     }
 }
