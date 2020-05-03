@@ -4,12 +4,12 @@ import com.mobile.app.ws.io.entity.UserEntity;
 import com.mobile.app.ws.repository.UserRepository;
 import com.mobile.app.ws.service.UserService;
 import com.mobile.app.ws.shared.dto.UserDto;
+import com.mobile.app.ws.utils.Util;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
-import java.util.UUID;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(user , userToBeSaved);
         userToBeSaved.setEncryptedPassword("test");
 
-        userToBeSaved.setUserId(generateRandomUserId());
+        userToBeSaved.setUserId(Util.generateRandomUserId());
 
         UserEntity savedUser = userRepository.save(userToBeSaved);
 
@@ -36,16 +36,7 @@ public class UserServiceImpl implements UserService {
         return returnValue;
     }
 
-    private String generateRandomUserId() {
-        Random rand = new Random();
 
-        // Generate random integers in range 0 to 999
-        int rand_int1 = rand.nextInt(1000);
-        int rand_int2 = rand.nextInt(1000);
-
-        String userId = String.valueOf(String.valueOf(rand_int1) + String.valueOf(rand_int2));
-        return userId;
-    }
 
     @Override
     public UserDto findUserByUserId(String userId) {
