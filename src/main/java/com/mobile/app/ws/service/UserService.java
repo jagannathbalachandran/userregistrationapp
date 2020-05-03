@@ -11,4 +11,6 @@ public interface UserService {
     public UserDto createUser(UserDto userDto);
 
     public UserDto findUserByUserId(String userId);
+
+    public UserDto updateUser(UserDto userDto);
 }

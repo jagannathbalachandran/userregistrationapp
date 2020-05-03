@@ -3,12 +3,11 @@ package com.mobile.app.ws.ui.controller;
 import com.mobile.app.ws.service.UserService;
 import com.mobile.app.ws.shared.dto.UserDto;
 import com.mobile.app.ws.ui.model.request.UserDetailsModel;
+import com.mobile.app.ws.ui.model.request.UserUpdateDetailsModel;
 import com.mobile.app.ws.ui.model.response.UserResponseModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -27,13 +26,6 @@ public class UserController {
         return returnValue;
     }
 
-
-//    @GetMapping(path = "/{id}")
-//    public String getUser(@PathVariable String id){
-//        System.out.println("Get by user id " + id);
-//        return "Get by user id " + id;
-//    }
-
     @PostMapping
     public UserResponseModel createUser(@RequestBody UserDetailsModel userDetailsModel){
         System.out.println("Created User with firstName " + userDetailsModel.getFirstName() + " and last name " + userDetailsModel.getLastName());
@@ -42,13 +34,20 @@ public class UserController {
         BeanUtils.copyProperties(userDetailsModel,userDto);
         userDto = userService.createUser(userDto);
         BeanUtils.copyProperties(userDto,userResponse);
-
+        System.out.println("Created user  " + userDetailsModel.getFirstName() + " " + userDetailsModel.getLastName() + " with user id " + userDto.getUserId());
         return userResponse;
     }
 
     @PutMapping
-    public String updateUser(){
-        return "Update User was called";
+    public UserResponseModel updateUser(@RequestBody UserUpdateDetailsModel updateUserDetails){
+
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(updateUserDetails,userDto);
+        UserDto updateUser = userService.updateUser(userDto);
+        UserResponseModel userResponseModel = new UserResponseModel();
+        BeanUtils.copyProperties(updateUser , userResponseModel);
+        return userResponseModel;
+
     }
 
     @DeleteMapping

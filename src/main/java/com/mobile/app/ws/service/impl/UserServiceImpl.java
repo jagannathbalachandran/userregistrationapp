@@ -48,4 +48,19 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(userExists , returnValue);
         return returnValue;
     }
+
+    @Override
+    public UserDto updateUser(UserDto userDto) {
+        UserEntity userExists = userRepository.findByUserId(userDto.getUserId());
+        if (userExists == null) throw new RuntimeException("Record doesn't exist");
+        userExists.setFirstName(userDto.getFirstName());
+        userExists.setLastName(userDto.getLastName());
+        userRepository.save(userExists);
+
+        UserDto returnValue = new UserDto();
+
+        BeanUtils.copyProperties(userExists ,returnValue);
+        return returnValue;
+
+    }
 }
