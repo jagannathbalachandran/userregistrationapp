@@ -46,6 +46,7 @@ public class UserController {
         UserDto updateUser = userService.updateUser(userDto);
         UserResponseModel userResponseModel = new UserResponseModel();
         BeanUtils.copyProperties(updateUser , userResponseModel);
+        System.out.println("Updated user with id " + updateUserDetails.getUserId());
         return userResponseModel;
 
     }
