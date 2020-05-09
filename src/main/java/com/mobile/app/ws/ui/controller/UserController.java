@@ -20,7 +20,7 @@ public class UserController {
     public UserResponseModel getUser(@PathVariable String id){
         System.out.println("Get by user id " + id.toString());
         UserResponseModel returnValue = new UserResponseModel();
-        UserDto user = userService.findUserByUserId(id);
+        UserDto user = userService.getUser(id);
 
         BeanUtils.copyProperties(user ,returnValue );
         return returnValue;

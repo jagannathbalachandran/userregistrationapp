@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserDto findUserByUserId(String userId) {
+    public UserDto getUser(String userId) {
 
         UserEntity userExists = userRepository.findByUserId(userId);
         if(userExists == null) throw new RuntimeException("Record doesn't exist");
@@ -70,6 +70,16 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(userExists ,returnValue);
         return returnValue;
 
+    }
+
+    @Override
+    public UserDto getUserByEmailId(String email) {
+        UserEntity userExists = userRepository.findByEmail(email);
+        if(userExists == null) throw new RuntimeException("Record doesn't exist");
+
+        UserDto returnValue = new UserDto();
+        BeanUtils.copyProperties(userExists , returnValue);
+        return returnValue;
     }
 
     @Override
