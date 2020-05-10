@@ -1,7 +1,5 @@
 package com.mobile.app.ws.ui.model.response;
 
-import java.util.UUID;
-
 public class UserResponseModel {
     private String userId;
 

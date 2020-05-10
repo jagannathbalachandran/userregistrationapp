@@ -7,6 +7,7 @@ import com.mobile.app.ws.ui.model.request.UserUpdateDetailsModel;
 import com.mobile.app.ws.ui.model.response.UserResponseModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,7 +17,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/{id}" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public UserResponseModel getUser(@PathVariable String id){
         System.out.println("Get by user id " + id.toString());
         UserResponseModel returnValue = new UserResponseModel();
@@ -26,7 +27,7 @@ public class UserController {
         return returnValue;
     }
 
-    @PostMapping
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public UserResponseModel createUser(@RequestBody UserDetailsModel userDetailsModel){
         System.out.println("Created User with firstName " + userDetailsModel.getFirstName() + " and last name " + userDetailsModel.getLastName());
         UserResponseModel userResponse = new UserResponseModel();
@@ -51,8 +52,9 @@ public class UserController {
 
     }
 
-    @DeleteMapping
-    public String deleteUser(){
-        return "Delete User was called";
+    @DeleteMapping(path = "/{id}")
+    public String deleteUser(@PathVariable String id){
+        userService.deleteUser(id);
+        return "Deleted";
     }
 }
