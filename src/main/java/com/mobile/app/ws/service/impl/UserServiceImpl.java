@@ -14,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 @Service
@@ -87,6 +90,21 @@ public class UserServiceImpl implements UserService {
         UserEntity existingUser = userRepository.findByUserId(id);
         if(existingUser == null) throw new RuntimeException("Record doesn't exist");
         userRepository.delete(existingUser);
+    }
+
+    @Override
+    public List<UserDto> getAllUsers() {
+//        List<UserEntity> users = new LinkedList<>();
+        List<UserDto> usersDto = new LinkedList<>();
+
+        Iterable<UserEntity> userEntities = userRepository.findAll();
+        for (Iterator iterator = userEntities.iterator(); iterator.hasNext(); ) {
+                UserEntity userEntity = (UserEntity) iterator.next();
+                UserDto userDto = new UserDto();
+                BeanUtils.copyProperties(userEntity , userDto);
+                usersDto.add(userDto);
+        }
+        return usersDto;
     }
 
     @Override

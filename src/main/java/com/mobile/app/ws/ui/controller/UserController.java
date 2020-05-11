@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -25,6 +29,21 @@ public class UserController {
 
         BeanUtils.copyProperties(user ,returnValue );
         return returnValue;
+    }
+
+    @GetMapping
+    public List<UserResponseModel> getUser(){
+        System.out.println("Get all users");
+        List<UserResponseModel> returnListOfUsers = new LinkedList<>();
+
+        List<UserDto> allUsers = userService.getAllUsers();
+        for (Iterator<UserDto> iterator = allUsers.iterator(); iterator.hasNext(); ) {
+            UserDto userDto = iterator.next();
+            UserResponseModel userResponseModel = new UserResponseModel();
+            BeanUtils.copyProperties(userDto , userResponseModel);
+            returnListOfUsers.add(userResponseModel);
+        }
+        return returnListOfUsers;
     }
 
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})

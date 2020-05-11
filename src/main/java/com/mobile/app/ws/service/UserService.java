@@ -4,6 +4,8 @@ import com.mobile.app.ws.shared.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface UserService extends UserDetailsService {
 
@@ -13,7 +15,9 @@ public interface UserService extends UserDetailsService {
 
     public UserDto updateUser(UserDto userDto);
 
-    UserDto getUserByEmailId(String email);
+    public UserDto getUserByEmailId(String email);
 
-    void deleteUser(String id);
+    public void deleteUser(String id);
+
+    public List<UserDto> getAllUsers();
 }
