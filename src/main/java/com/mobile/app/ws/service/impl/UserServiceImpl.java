@@ -7,6 +7,9 @@ import com.mobile.app.ws.shared.dto.UserDto;
 import com.mobile.app.ws.utils.Util;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -94,22 +97,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers(int page, int limit) {
-        // page = 1 , limit = 5 ie 1 to 5
-        int lowerLimit = (page  - 1) * limit + 1;
-        int upperLimit = (page) * limit ;
 
         List<UserDto> usersDto = new LinkedList<>();
-        Iterable<UserEntity> userEntities = userRepository.findAll();
+        Pageable pageable = PageRequest.of(page , limit);
+        Page<UserEntity> userPage = userRepository.findAll(pageable);
+        Iterable<UserEntity> users = userPage.getContent();
 
-        for (Iterator iterator = userEntities.iterator(); iterator.hasNext(); ) {
-                UserEntity userEntity = (UserEntity) iterator.next();
-                UserDto userDto = new UserDto();
-                BeanUtils.copyProperties(userEntity , userDto);
-                    usersDto.add(userDto);
+        for (UserEntity userEntity : users){
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(userEntity , userDto);
+            usersDto.add(userDto);
         }
-        if(usersDto.size() < lowerLimit) return new LinkedList<UserDto>();
-        if(usersDto.size() <= upperLimit) return usersDto.subList(lowerLimit -1  , usersDto.size());
-        return usersDto.subList(lowerLimit - 1 , upperLimit);
+        return usersDto;
     }
 
     @Override
