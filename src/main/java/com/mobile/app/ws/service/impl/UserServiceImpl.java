@@ -93,18 +93,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
-//        List<UserEntity> users = new LinkedList<>();
-        List<UserDto> usersDto = new LinkedList<>();
+    public List<UserDto> getAllUsers(int page, int limit) {
+        // page = 1 , limit = 5 ie 1 to 5
+        int lowerLimit = (page  - 1) * limit + 1;
+        int upperLimit = (page) * limit ;
 
+        List<UserDto> usersDto = new LinkedList<>();
         Iterable<UserEntity> userEntities = userRepository.findAll();
+
         for (Iterator iterator = userEntities.iterator(); iterator.hasNext(); ) {
                 UserEntity userEntity = (UserEntity) iterator.next();
                 UserDto userDto = new UserDto();
                 BeanUtils.copyProperties(userEntity , userDto);
-                usersDto.add(userDto);
+                    usersDto.add(userDto);
         }
-        return usersDto;
+        if(usersDto.size() < lowerLimit) return new LinkedList<UserDto>();
+        if(usersDto.size() <= upperLimit) return usersDto.subList(lowerLimit -1  , usersDto.size());
+        return usersDto.subList(lowerLimit - 1 , upperLimit);
     }
 
     @Override

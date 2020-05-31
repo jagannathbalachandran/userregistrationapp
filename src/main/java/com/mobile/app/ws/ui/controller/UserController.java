@@ -32,11 +32,12 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponseModel> getUser(){
+    public List<UserResponseModel> getAllUser(@RequestParam(value = "page" , defaultValue = "1") int page,
+                                              @RequestParam(value = "limit" , defaultValue = "5") int limit){
         System.out.println("Get all users");
         List<UserResponseModel> returnListOfUsers = new LinkedList<>();
 
-        List<UserDto> allUsers = userService.getAllUsers();
+        List<UserDto> allUsers = userService.getAllUsers(page , limit);
         for (Iterator<UserDto> iterator = allUsers.iterator(); iterator.hasNext(); ) {
             UserDto userDto = iterator.next();
             UserResponseModel userResponseModel = new UserResponseModel();
