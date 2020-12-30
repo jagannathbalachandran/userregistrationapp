@@ -1,11 +1,9 @@
 package com.mobile.app.ws.io.entity;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity(name="users")
 public class UserEntity implements Serializable {
@@ -36,6 +34,9 @@ public class UserEntity implements Serializable {
 
     @Column(nullable = false)
     private Boolean emailVerificationStatus = false;
+
+    @OneToMany(mappedBy = "userDetails" , cascade = CascadeType.ALL)
+    private List<AddressEntity> addresses;
 
     public String getFirstName() {
         return firstName;
@@ -99,5 +100,13 @@ public class UserEntity implements Serializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public List<AddressEntity> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<AddressEntity> addresses) {
+        this.addresses = addresses;
     }
 }

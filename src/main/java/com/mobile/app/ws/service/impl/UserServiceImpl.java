@@ -1,10 +1,13 @@
 package com.mobile.app.ws.service.impl;
 
+import com.mobile.app.ws.io.entity.AddressEntity;
 import com.mobile.app.ws.io.entity.UserEntity;
 import com.mobile.app.ws.repository.UserRepository;
 import com.mobile.app.ws.service.UserService;
+import com.mobile.app.ws.shared.dto.AddressDto;
 import com.mobile.app.ws.shared.dto.UserDto;
 import com.mobile.app.ws.utils.Util;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,21 +35,26 @@ public class UserServiceImpl implements UserService {
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
-    public UserDto createUser(UserDto user) {
+    public UserDto createUser(UserDto userDto) {
 
-        UserEntity userExists = userRepository.findByEmail(user.getEmail());
+        UserEntity userExists = userRepository.findByEmail(userDto.getEmail());
         if (userExists != null) throw new RuntimeException("Record already exists");
 
-        UserEntity userToBeSaved = new UserEntity();
-        BeanUtils.copyProperties(user , userToBeSaved);
+        userDto.setEncryptedPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
+        userDto.setUserId(Util.generateRandomUserId());
 
-        userToBeSaved.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        userToBeSaved.setUserId(Util.generateRandomUserId());
+        for (Iterator iterator = userDto.getAddresses().iterator(); iterator.hasNext(); ) {
+            AddressDto addressDto = (AddressDto) iterator.next();
+            addressDto.setAddressId(Util.generateRandomAddressId());
+            addressDto.setUserDetails(userDto);
+        }
+
+        ModelMapper mapper = new ModelMapper();
+        UserEntity userToBeSaved = mapper.map(userDto , UserEntity.class);
 
         UserEntity savedUser = userRepository.save(userToBeSaved);
 
-        UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(savedUser , returnValue);
+        UserDto returnValue =  mapper.map(savedUser ,UserDto.class );
         return returnValue;
     }
 
@@ -58,8 +66,8 @@ public class UserServiceImpl implements UserService {
         UserEntity userExists = userRepository.findByUserId(userId);
         if(userExists == null) throw new RuntimeException("Record doesn't exist");
 
-        UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(userExists , returnValue);
+        ModelMapper mapper = new ModelMapper();
+        UserDto returnValue = mapper.map(userExists , UserDto.class);
         return returnValue;
     }
 

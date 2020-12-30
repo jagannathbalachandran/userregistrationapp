@@ -1,13 +1,17 @@
 package com.mobile.app.ws.ui.controller;
 
 import com.mobile.app.ws.service.UserService;
+import com.mobile.app.ws.shared.dto.AddressDto;
 import com.mobile.app.ws.shared.dto.UserDto;
 import com.mobile.app.ws.ui.model.request.UserDetailsModel;
 import com.mobile.app.ws.ui.model.request.UserUpdateDetailsModel;
+import com.mobile.app.ws.ui.model.response.AddressResponseModel;
 import com.mobile.app.ws.ui.model.response.UserResponseModel;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
@@ -24,38 +28,58 @@ public class UserController {
     @GetMapping(path = "/{id}" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public UserResponseModel getUser(@PathVariable String id){
         System.out.println("Get by user id " + id.toString());
-        UserResponseModel returnValue = new UserResponseModel();
         UserDto user = userService.getUser(id);
-
-        BeanUtils.copyProperties(user ,returnValue );
+        ModelMapper mapper = new ModelMapper();
+        UserResponseModel returnValue = mapper.map(user , UserResponseModel.class);
         return returnValue;
     }
 
+    @GetMapping(path = "/{userId}/addresses" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public List<AddressResponseModel> getUserAddresses(@PathVariable String userId){
+        System.out.println("Get by user id " + userId.toString());
+        UserDto user = userService.getUser(userId);
+
+        ModelMapper mapper = new ModelMapper();
+
+        List<AddressResponseModel> addressResponseModels = new LinkedList<AddressResponseModel>();
+        for (Iterator iterator = user.getAddresses().iterator(); iterator.hasNext(); ) {
+            AddressDto addressDto = (AddressDto) iterator.next();
+            addressResponseModels.add(mapper.map(addressDto , AddressResponseModel.class));
+        }
+        return addressResponseModels;
+    }
+
     @GetMapping
-    public List<UserResponseModel> getAllUser(@RequestParam(value = "page" , defaultValue = "1") int page,
+    public List<UserResponseModel> getAllUser(@RequestParam(value = "page" , defaultValue = "0") int page,
                                               @RequestParam(value = "limit" , defaultValue = "5") int limit){
         System.out.println("Get all users");
         List<UserResponseModel> returnListOfUsers = new LinkedList<>();
+        ModelMapper mapper = new ModelMapper();
 
         List<UserDto> allUsers = userService.getAllUsers(page , limit);
         for (Iterator<UserDto> iterator = allUsers.iterator(); iterator.hasNext(); ) {
             UserDto userDto = iterator.next();
-            UserResponseModel userResponseModel = new UserResponseModel();
-            BeanUtils.copyProperties(userDto , userResponseModel);
+            UserResponseModel userResponseModel = mapper.map(userDto , UserResponseModel.class);
             returnListOfUsers.add(userResponseModel);
         }
         return returnListOfUsers;
     }
 
+
+
     @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public UserResponseModel createUser(@RequestBody UserDetailsModel userDetailsModel){
-        System.out.println("Created User with firstName " + userDetailsModel.getFirstName() + " and last name " + userDetailsModel.getLastName());
-        UserResponseModel userResponse = new UserResponseModel();
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetailsModel,userDto);
+        System.out.println("Create User with firstName " + userDetailsModel.getFirstName() + " and last name " + userDetailsModel.getLastName());
+
+        System.out.println("No of addresses is " + userDetailsModel.getAddresses().size());
+
+
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(userDetailsModel, UserDto.class);
+
         userDto = userService.createUser(userDto);
-        BeanUtils.copyProperties(userDto,userResponse);
-        System.out.println("Created user  " + userDetailsModel.getFirstName() + " " + userDetailsModel.getLastName() + " with user id " + userDto.getUserId());
+        UserResponseModel userResponse  = modelMapper.map(userDto, UserResponseModel.class);
+        System.out.println("Created user  " + userResponse.getFirstName() + " " + userResponse.getLastName() + " with user id " + userResponse.getUserId());
         return userResponse;
     }
 
@@ -65,9 +89,11 @@ public class UserController {
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(updateUserDetails,userDto);
         UserDto updateUser = userService.updateUser(userDto);
-        UserResponseModel userResponseModel = new UserResponseModel();
-        BeanUtils.copyProperties(updateUser , userResponseModel);
-        System.out.println("Updated user with id " + updateUserDetails.getUserId());
+
+        ModelMapper mapper = new ModelMapper();
+        UserResponseModel userResponseModel = mapper.map(updateUser , UserResponseModel.class);
+
+        System.out.println("Updated user with id " + userResponseModel.getUserId());
         return userResponseModel;
 
     }
@@ -75,6 +101,6 @@ public class UserController {
     @DeleteMapping(path = "/{id}")
     public String deleteUser(@PathVariable String id){
         userService.deleteUser(id);
-        return "Deleted";
+        return "Deleted user with id " + id;
     }
 }

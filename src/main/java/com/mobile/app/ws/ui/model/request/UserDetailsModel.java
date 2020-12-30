@@ -1,11 +1,22 @@
 package com.mobile.app.ws.ui.model.request;
 
+import java.util.List;
+
 public class UserDetailsModel {
 
     private String firstName;
     private String lastName;
     private String email;
     private String password;
+    private List<AddressModel> addresses;
+
+    public List<AddressModel> getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(List<AddressModel> addresses) {
+        this.addresses = addresses;
+    }
 
     public String getFirstName() {
         return firstName;
