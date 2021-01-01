@@ -13,7 +13,6 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Type;
@@ -49,6 +48,16 @@ public class UserController {
 
         Type listAddressResponseModel = new TypeToken<List<AddressResponseModel>>() {}.getType();
         return mapper.map(addressDtos, listAddressResponseModel);
+    }
+
+    @GetMapping(path = "/{userId}/addresses/{addressId}" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public AddressResponseModel getAddressForAUser(@PathVariable String userId ,@PathVariable String addressId ){
+        System.out.println("Get by user id " + userId.toString());
+        AddressDto addressDto = addressService.getAddressForAUser(userId , addressId);
+
+        ModelMapper mapper = new ModelMapper();
+
+       return mapper.map(addressDto , AddressResponseModel.class);
     }
 /*
     @GetMapping(path = "/{userId}/addresses" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})

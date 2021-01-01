@@ -50,4 +50,19 @@ public class AddressServiceImpl implements AddressService {
         Type listAddressDTOs = new TypeToken<List<AddressDto>>() {}.getType();
         return mapper.map(addressEntities, listAddressDTOs);
     }
+
+    @Override
+    public AddressDto getAddressForAUser(String userId, String addressId) {
+        UserEntity userEntity = userRepository.findByUserId(userId);
+
+        List<AddressEntity> addresses = userEntity.getAddresses();
+        AddressDto  addressDto = new AddressDto();
+        ModelMapper mapper = new ModelMapper();
+        for (Iterator<AddressEntity> iterator = addresses.iterator(); iterator.hasNext(); ) {
+            AddressEntity addressEntity = iterator.next();
+            if(addressEntity.getAddressId().equals(addressId))
+                addressDto=  mapper.map(addressEntity , AddressDto.class);
+        }
+       return addressDto;
+    }
 }
