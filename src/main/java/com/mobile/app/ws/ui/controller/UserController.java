@@ -1,5 +1,6 @@
 package com.mobile.app.ws.ui.controller;
 
+import com.mobile.app.ws.service.AddressService;
 import com.mobile.app.ws.service.UserService;
 import com.mobile.app.ws.shared.dto.AddressDto;
 import com.mobile.app.ws.shared.dto.UserDto;
@@ -8,12 +9,14 @@ import com.mobile.app.ws.ui.model.request.UserUpdateDetailsModel;
 import com.mobile.app.ws.ui.model.response.AddressResponseModel;
 import com.mobile.app.ws.ui.model.response.UserResponseModel;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +28,9 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AddressService addressService;
+
     @GetMapping(path = "/{id}" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public UserResponseModel getUser(@PathVariable String id){
         System.out.println("Get by user id " + id.toString());
@@ -34,6 +40,17 @@ public class UserController {
         return returnValue;
     }
 
+    @GetMapping(path = "/{userId}/addresses" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public List<AddressResponseModel> getUserAddresses(@PathVariable String userId){
+        System.out.println("Get by user id " + userId.toString());
+        List<AddressDto> addressDtos = addressService.getAddresses(userId);
+
+        ModelMapper mapper = new ModelMapper();
+
+        Type listAddressResponseModel = new TypeToken<List<AddressResponseModel>>() {}.getType();
+        return mapper.map(addressDtos, listAddressResponseModel);
+    }
+/*
     @GetMapping(path = "/{userId}/addresses" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public List<AddressResponseModel> getUserAddresses(@PathVariable String userId){
         System.out.println("Get by user id " + userId.toString());
@@ -48,6 +65,9 @@ public class UserController {
         }
         return addressResponseModels;
     }
+
+*/
+
 
     @GetMapping
     public List<UserResponseModel> getAllUser(@RequestParam(value = "page" , defaultValue = "0") int page,
