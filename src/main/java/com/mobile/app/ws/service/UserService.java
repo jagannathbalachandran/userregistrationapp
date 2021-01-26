@@ -20,4 +20,6 @@ public interface UserService extends UserDetailsService {
     public void deleteUser(String id);
 
     public List<UserDto> getAllUsers(int page, int limit);
+
+    public boolean verifyTokenHasExpired( String token);
 }

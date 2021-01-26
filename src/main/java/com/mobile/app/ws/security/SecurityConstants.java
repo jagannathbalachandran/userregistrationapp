@@ -10,4 +10,5 @@ public class SecurityConstants {
     public static final String TOKEN_SECRET = "jf9i4jgu83nfl0";
 
     public static final String USER_ID_STRING = "user-id";
+    public static final String EMAIL_VERIFICATION_URL = "/users/email-verification";
 }

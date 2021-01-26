@@ -52,6 +52,9 @@ public class UserServiceImpl implements UserService {
         ModelMapper mapper = new ModelMapper();
         UserEntity userToBeSaved = mapper.map(userDto , UserEntity.class);
 
+        userToBeSaved.setEmailVerificationToken(Util.generateEmailVerificationToken(userDto.getUserId()));
+        userToBeSaved.setEmailVerificationStatus(false);
+
         UserEntity savedUser = userRepository.save(userToBeSaved);
 
         UserDto returnValue =  mapper.map(savedUser ,UserDto.class );
@@ -120,9 +123,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean verifyTokenHasExpired(String token) {
+        UserEntity userEntity = userRepository.findByEmailVerificationToken(token);
+        String userToken = userEntity.getEmailVerificationToken();
+        boolean isExpired = Util.hasTokenExpired(token);
+        if(!isExpired){
+            userEntity.setEmailVerificationStatus(true);
+            userEntity.setEmailVerificationToken(null);
+            userRepository.save(userEntity);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity == null) throw new UsernameNotFoundException(email);
-        return new User(userEntity.getEmail() , userEntity.getEncryptedPassword() , new ArrayList<>());
+        return new User(userEntity.getEmail() , userEntity.getEncryptedPassword() , userEntity.getEmailVerificationStatus() , true , true  , true , new ArrayList<>());
     }
 }

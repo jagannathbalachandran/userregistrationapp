@@ -1,9 +1,8 @@
 package com.mobile.app.ws.io.entity;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
-import javax.persistence.*;
 
 @Entity(name="users")
 public class UserEntity implements Serializable {
@@ -73,6 +72,10 @@ public class UserEntity implements Serializable {
     public boolean isEmailVerificationStatus() {
         return emailVerificationStatus;
     }
+
+    public Boolean getEmailVerificationStatus() {
+            return emailVerificationStatus;
+        }
 
     public void setEmailVerificationStatus(boolean emailVerificationStatus) {
         this.emailVerificationStatus = emailVerificationStatus;

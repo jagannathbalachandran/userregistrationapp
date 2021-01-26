@@ -59,6 +59,13 @@ public class UserController {
 
        return mapper.map(addressDto , AddressResponseModel.class);
     }
+
+    @GetMapping(path = "/email-verification" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public boolean verifyEmailAddress( @RequestParam(value = "token") String token ){
+        System.out.println("Verify Token for user  " + token);
+
+        return !userService.verifyTokenHasExpired(token);
+    }
 /*
     @GetMapping(path = "/{userId}/addresses" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public List<AddressResponseModel> getUserAddresses(@PathVariable String userId){
@@ -105,6 +112,7 @@ public class UserController {
 
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetailsModel, UserDto.class);
+
 
         userDto = userService.createUser(userDto);
         UserResponseModel userResponse  = modelMapper.map(userDto, UserResponseModel.class);

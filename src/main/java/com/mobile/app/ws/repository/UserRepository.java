@@ -13,4 +13,5 @@ import java.util.UUID;
 public interface UserRepository extends PagingAndSortingRepository<UserEntity,Long> {
     UserEntity findByUserId(String userId);
     UserEntity findByEmail(String email);
+    UserEntity findByEmailVerificationToken(String token);
 }
