@@ -1,10 +1,12 @@
 package com.mobile.app.ws.service.impl;
 
-import com.mobile.app.ws.io.entity.AddressEntity;
+import com.mobile.app.ws.io.entity.PasswordResetTokenEntity;
 import com.mobile.app.ws.io.entity.UserEntity;
+import com.mobile.app.ws.repository.PasswordResetTokenRepository;
 import com.mobile.app.ws.repository.UserRepository;
 import com.mobile.app.ws.service.UserService;
 import com.mobile.app.ws.shared.dto.AddressDto;
+import com.mobile.app.ws.shared.dto.PasswordResetDetailsDto;
 import com.mobile.app.ws.shared.dto.UserDto;
 import com.mobile.app.ws.utils.Util;
 import org.modelmapper.ModelMapper;
@@ -30,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -60,7 +65,6 @@ public class UserServiceImpl implements UserService {
         UserDto returnValue =  mapper.map(savedUser ,UserDto.class );
         return returnValue;
     }
-
 
 
     @Override
@@ -133,6 +137,49 @@ public class UserServiceImpl implements UserService {
             userRepository.save(userEntity);
             return false;
         }
+        return true;
+    }
+
+    @Override
+    public boolean requestPasswordReset(String email) {
+        UserEntity userEntity = userRepository.findByEmail(email);
+        if (userEntity == null)
+            return false;
+
+        String token = Util.generatePasswordResetToken(userEntity.getUserId());
+        PasswordResetTokenEntity passwordResetTokenEntity = new PasswordResetTokenEntity();
+        passwordResetTokenEntity.setToken(token);
+        passwordResetTokenEntity.setUserDetails(userEntity);
+        passwordResetTokenRepository.save(passwordResetTokenEntity);
+
+        System.out.println("Generated token " + token + " for user " + email);
+        return true;
+    }
+
+    @Override
+    public boolean passwordReset(PasswordResetDetailsDto passwordResetDetailsDto) {
+        System.out.println("Password reset for " + passwordResetDetailsDto.getEmail());
+        String actualToken = passwordResetDetailsDto.getToken();
+
+        boolean isExpired = Util.hasTokenExpired(actualToken);
+        if(isExpired) return false;
+
+        UserEntity userEntity = userRepository.findByEmail(passwordResetDetailsDto.getEmail());
+
+        if(userEntity == null)
+            return false;
+
+        PasswordResetTokenEntity passwordResetTokenEntity = passwordResetTokenRepository.findByUserDetails(userEntity);
+        String expectedToken = passwordResetTokenEntity.getToken();
+        if(!actualToken.equals(expectedToken)){
+            return false;
+        }
+
+        userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(passwordResetDetailsDto.getPassword()));
+        userRepository.save(userEntity);
+
+        passwordResetTokenRepository.delete(passwordResetTokenEntity);
+
         return true;
     }
 

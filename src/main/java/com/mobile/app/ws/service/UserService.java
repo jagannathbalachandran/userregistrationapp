@@ -1,5 +1,6 @@
 package com.mobile.app.ws.service;
 
+import com.mobile.app.ws.shared.dto.PasswordResetDetailsDto;
 import com.mobile.app.ws.shared.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -22,4 +23,8 @@ public interface UserService extends UserDetailsService {
     public List<UserDto> getAllUsers(int page, int limit);
 
     public boolean verifyTokenHasExpired( String token);
+
+    public boolean requestPasswordReset(String email);
+
+    boolean passwordReset(PasswordResetDetailsDto passwordResetDetailsDto);
 }

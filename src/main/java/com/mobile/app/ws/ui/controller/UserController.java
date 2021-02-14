@@ -3,7 +3,10 @@ package com.mobile.app.ws.ui.controller;
 import com.mobile.app.ws.service.AddressService;
 import com.mobile.app.ws.service.UserService;
 import com.mobile.app.ws.shared.dto.AddressDto;
+import com.mobile.app.ws.shared.dto.PasswordResetDetailsDto;
 import com.mobile.app.ws.shared.dto.UserDto;
+import com.mobile.app.ws.ui.model.request.PasswordResetDetailsModel;
+import com.mobile.app.ws.ui.model.request.PasswordResetRequestDetailsModel;
 import com.mobile.app.ws.ui.model.request.UserDetailsModel;
 import com.mobile.app.ws.ui.model.request.UserUpdateDetailsModel;
 import com.mobile.app.ws.ui.model.response.AddressResponseModel;
@@ -63,7 +66,6 @@ public class UserController {
     @GetMapping(path = "/email-verification" , produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
     public boolean verifyEmailAddress( @RequestParam(value = "token") String token ){
         System.out.println("Verify Token for user  " + token);
-
         return !userService.verifyTokenHasExpired(token);
     }
 /*
@@ -99,6 +101,21 @@ public class UserController {
             returnListOfUsers.add(userResponseModel);
         }
         return returnListOfUsers;
+    }
+
+    @PostMapping(path = "/password-reset-request", produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public boolean requestResetPassword(@RequestBody PasswordResetRequestDetailsModel passwordResetRequestDetailsModel){
+        System.out.println("Password reset request for  " + passwordResetRequestDetailsModel.getEmail() );
+        return userService.requestPasswordReset(passwordResetRequestDetailsModel.getEmail());
+    }
+
+    @PutMapping(path = "/password-reset", produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public boolean passwordReset(@RequestBody PasswordResetDetailsModel passwordResetDetailsModel){
+
+        ModelMapper mapper = new ModelMapper();
+
+        PasswordResetDetailsDto passwordResetDetailsDto =  mapper.map(passwordResetDetailsModel , PasswordResetDetailsDto.class);
+        return userService.passwordReset(passwordResetDetailsDto);
     }
 
 
