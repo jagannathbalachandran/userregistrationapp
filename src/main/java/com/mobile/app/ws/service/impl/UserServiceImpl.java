@@ -1,5 +1,7 @@
 package com.mobile.app.ws.service.impl;
 
+import com.mobile.app.ws.exception.UserAlreadyExistsException;
+import com.mobile.app.ws.exception.UserNotFoundException;
 import com.mobile.app.ws.io.entity.PasswordResetTokenEntity;
 import com.mobile.app.ws.io.entity.UserEntity;
 import com.mobile.app.ws.repository.PasswordResetTokenRepository;
@@ -43,7 +45,8 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto userDto) {
 
         UserEntity userExists = userRepository.findByEmail(userDto.getEmail());
-        if (userExists != null) throw new RuntimeException("Record already exists");
+        if (userExists != null)
+            throw new UserAlreadyExistsException("User already exists");
 
         userDto.setEncryptedPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
         userDto.setUserId(Util.generateRandomUserId());
@@ -96,7 +99,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserByEmailId(String email) {
         UserEntity userExists = userRepository.findByEmail(email);
-        if(userExists == null) throw new RuntimeException("Record doesn't exist");
+        if(userExists == null) throw new UserNotFoundException("User does not exist");
 
         UserDto returnValue = new UserDto();
         BeanUtils.copyProperties(userExists , returnValue);

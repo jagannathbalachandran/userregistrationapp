@@ -1,5 +1,7 @@
 package com.mobile.app.ws.service.impl;
 
+import com.mobile.app.ws.exception.UserAlreadyExistsException;
+import com.mobile.app.ws.exception.UserNotFoundException;
 import com.mobile.app.ws.io.entity.AddressEntity;
 import com.mobile.app.ws.io.entity.UserEntity;
 import com.mobile.app.ws.repository.UserRepository;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +61,7 @@ public class UserServiceImplTest {
 
         when(userRepository.findByEmail("jagannathbalachandran@gmail.com")).thenReturn(userEntity);
 
-        Assertions.assertThrows(RuntimeException.class ,
+        Assertions.assertThrows(UserNotFoundException.class ,
                 ()->{
                     UserDto userDto = userService.getUserByEmailId("jaggu@gmail.com");
                 });
@@ -78,15 +81,42 @@ public class UserServiceImplTest {
         Assertions.assertNotNull(createdUser);
         Assertions.assertEquals(userTobeSaved.getPassword() , createdUser.getPassword());
         Assertions.assertEquals(userTobeSaved.getEmail() , createdUser.getEmail());
-        Assertions.assertEquals(userTobeSaved.getAddresses().size() , createdUser.getAddresses().size());
+        Assertions.assertEquals(userTobeSaved.getFirstName() , createdUser.getFirstName());
+        Assertions.assertEquals(userTobeSaved.getLastName() , createdUser.getLastName());
 
+        Assertions.assertEquals(userTobeSaved.getAddresses().size() , createdUser.getAddresses().size());
+        Assertions.assertEquals(userTobeSaved.getAddresses().get(0).getCity() , createdUser.getAddresses().get(0).getCity());
+        Assertions.assertEquals(userTobeSaved.getAddresses().get(0).getState() , createdUser.getAddresses().get(0).getState());
+        Assertions.assertEquals(userTobeSaved.getAddresses().get(0).getCountry() , createdUser.getAddresses().get(0).getCountry());
+        Assertions.assertEquals(userTobeSaved.getAddresses().get(0).getPostcode() , createdUser.getAddresses().get(0).getPostcode());
+
+    }
+
+    @Test
+    void testCreateUserThrowsExceptionWhenUserAlreadyExists()
+    {
+        UserEntity userEntity = getUserEntity();
+        UserDto userTobeSaved = getUserDto();
+
+        when(userRepository.findByEmail("jagannathbalachandran@gmail.com")).thenReturn(userEntity);
+
+        Assertions.assertThrows(UserAlreadyExistsException.class ,
+                ()->{
+                    UserDto createdUser = userService.createUser(userTobeSaved);
+                }) ;
     }
 
     private UserDto getUserDto() {
         UserDto userTobeSaved = new UserDto();
+
+        userTobeSaved.setEmail("jagannathbalachandran@gmail.com");
+        userTobeSaved.setFirstName("Jagannath");
+        userTobeSaved.setLastName("Balachandran");
         userTobeSaved.setEmail("jagannathbalachandran@gmail.com");
         userTobeSaved.setUserId("user123");
         userTobeSaved.setPassword("password123");
+        userTobeSaved.setEncryptedPassword("password123");
+
 
         List<AddressDto> addressDtoList = new ArrayList<>();
         AddressDto address1 = new AddressDto();
@@ -95,6 +125,8 @@ public class UserServiceImplTest {
         address1.setCountry("USA");
         address1.setPostcode("12345");
         address1.setState("NY");
+        address1.setType("Shipping");
+
         addressDtoList.add(address1);
         userTobeSaved.setAddresses(addressDtoList);
         return userTobeSaved;
@@ -108,6 +140,8 @@ public class UserServiceImplTest {
         userEntity.setUserId("user123");
         userEntity.setEncryptedPassword("password123");
         userEntity.setEmail("jagannathbalachandran@gmail.com");
+        userEntity.setEmailVerificationStatus(false);
+        userEntity.setEmailVerificationToken("emailtoken123");
         userEntity.setAddresses(getListOfAddressEntities());
         return userEntity;
     }
@@ -120,7 +154,10 @@ public class UserServiceImplTest {
         addressEntity1.setCountry("USA");
         addressEntity1.setPostcode("12345");
         addressEntity1.setState("NY");
+        addressEntity1.setId(1L);
+        addressEntity1.setType("Shipping");
         addressEntities.add(addressEntity1);
+
         return addressEntities;
     }
 }
