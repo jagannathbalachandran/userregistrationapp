@@ -13,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.swing.text.html.parser.Entity;
@@ -22,6 +24,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 public class UserServiceImplTest {
@@ -104,6 +107,48 @@ public class UserServiceImplTest {
                 ()->{
                     UserDto createdUser = userService.createUser(userTobeSaved);
                 }) ;
+    }
+
+
+    @Test
+    void testUpdateUser() {
+        UserEntity userEntity = getUserEntity();
+
+        UserDto userTobeUpdated = new UserDto();
+        userTobeUpdated.setEmail("jagannathbalachandran@gmail.com");
+        userTobeUpdated.setFirstName("Jaggu");
+        userTobeUpdated.setLastName("Bala");
+        userTobeUpdated.setUserId("user123");
+        List<AddressDto> addressDtoList = new ArrayList<>();
+        AddressDto address1 = new AddressDto();
+        address1.setAddressId("address123");
+        address1.setCity("Bangalore");
+        address1.setCountry("India");
+        address1.setPostcode("560062");
+        address1.setState("KA");
+        address1.setType("Shipping");
+
+        addressDtoList.add(address1);
+        userTobeUpdated.setAddresses(addressDtoList);
+
+
+        when(userRepository.findByUserId("user123")).thenReturn(userEntity);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity);
+
+        UserDto updatedUser = userService.updateUser(userTobeUpdated);
+
+        Assertions.assertNotNull(updatedUser);
+        Assertions.assertEquals(updatedUser.getEmail() , userTobeUpdated.getEmail());
+        Assertions.assertEquals(updatedUser.getFirstName() , userTobeUpdated.getFirstName());
+        Assertions.assertEquals(updatedUser.getLastName() , userTobeUpdated.getLastName());
+
+        Assertions.assertEquals(updatedUser.getAddresses().size() , userTobeUpdated.getAddresses().size());
+        Assertions.assertEquals(updatedUser.getAddresses().get(0).getCity() , userTobeUpdated.getAddresses().get(0).getCity());
+//        Assertions.assertEquals(updatedUser.getAddresses().get(0).getState() , userTobeUpdated.getAddresses().get(0).getState());
+//        Assertions.assertEquals(updatedUser.getAddresses().get(0).getCountry() , userTobeUpdated.getAddresses().get(0).getCountry());
+//        Assertions.assertEquals(updatedUser.getAddresses().get(0).getPostcode() , userTobeUpdated.getAddresses().get(0).getPostcode());
+//        Assertions.assertEquals(updatedUser.getAddresses().get(0).getType() , userTobeUpdated.getAddresses().get(0).getType());
+
     }
 
     private UserDto getUserDto() {

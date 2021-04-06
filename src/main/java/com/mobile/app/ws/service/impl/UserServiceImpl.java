@@ -2,6 +2,7 @@ package com.mobile.app.ws.service.impl;
 
 import com.mobile.app.ws.exception.UserAlreadyExistsException;
 import com.mobile.app.ws.exception.UserNotFoundException;
+import com.mobile.app.ws.io.entity.AddressEntity;
 import com.mobile.app.ws.io.entity.PasswordResetTokenEntity;
 import com.mobile.app.ws.io.entity.UserEntity;
 import com.mobile.app.ws.repository.PasswordResetTokenRepository;
@@ -84,14 +85,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto) {
         UserEntity userExists = userRepository.findByUserId(userDto.getUserId());
-        if (userExists == null) throw new RuntimeException("Record doesn't exist");
+        if (userExists == null) throw new UserNotFoundException("User doesn't exist");
         userExists.setFirstName(userDto.getFirstName());
         userExists.setLastName(userDto.getLastName());
-        userRepository.save(userExists);
+        ModelMapper mapper = new ModelMapper();
 
-        UserDto returnValue = new UserDto();
+        List<AddressEntity> addressEntityList = new LinkedList<>();
+        for (Iterator iterator = userDto.getAddresses().iterator(); iterator.hasNext(); ) {
+            AddressDto addressDto = (AddressDto) iterator.next();
+            AddressEntity addressEntity = mapper.map(addressDto ,AddressEntity.class );
+            addressEntityList.add(addressEntity);
+        }
+        userExists.setAddresses(addressEntityList);
+        UserEntity save = userRepository.save(userExists);
 
-        BeanUtils.copyProperties(userExists ,returnValue);
+        UserDto returnValue =  mapper.map(save ,UserDto.class );
         return returnValue;
 
     }
